@@ -1,0 +1,10 @@
+.link {
+  margin: 0 10px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

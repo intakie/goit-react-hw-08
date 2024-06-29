@@ -1,47 +1,45 @@
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  fetchContacts,
-  addContact as addContactOperation,
-} from '../../redux/contactsOps';
-import {
-  selectFilteredContacts,
-  selectLoading,
-  selectError,
-} from '../../redux/contactsSlice';
-import { changeFilter, selectNameFilter } from '../../redux/filtersSlice';
-import ContactList from '../ContactList/ContactList';
-import ContactForm from '../ContactForm/ContactForm';
-import SearchBox from '../SearchBox/SearchBox';
-import css from './App.module.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { lazy, Suspense } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Layout from '../Layout/Layout';
+import { refreshUser } from '../../redux/auth/operations';
+import { fetchContacts } from '../../redux/contacts/operations';
+import { selectIsLoggedIn } from '../../redux/auth/selectors';
+
+const HomePage = lazy(() => import('../../pages/HomePage/HomePage'));
+const RegisterPage = lazy(() =>
+  import('../../pages/RegisterPage/RegisterPage')
+);
+const LoginPage = lazy(() => import('../../pages/LoginPage/LoginPage'));
+const ContactsPage = lazy(() =>
+  import('../../pages/ContactsPage/ContactsPage')
+);
 
 export default function App() {
   const dispatch = useDispatch();
-  const filteredContacts = useSelector(selectFilteredContacts);
-  const loading = useSelector(selectLoading);
-  const error = useSelector(selectError);
-  const filter = useSelector(selectNameFilter);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
 
   useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refreshUser());
   }, [dispatch]);
 
-  const handleAddContact = (name, number) => {
-    dispatch(addContactOperation({ name, number }));
-  };
-
-  const handleFilterChange = e => {
-    dispatch(changeFilter(e.target.value));
-  };
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(fetchContacts());
+    }
+  }, [dispatch, isLoggedIn]);
 
   return (
-    <div className={css.container}>
-      <h1>Phonebook</h1>
-      <ContactForm onAddContact={handleAddContact} />
-      <SearchBox value={filter} onChange={handleFilterChange} />
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
-      <ContactList />
-    </div>
+    <Layout>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/contacts" element={<ContactsPage />} />
+        </Routes>
+      </Suspense>
+    </Layout>
   );
 }
