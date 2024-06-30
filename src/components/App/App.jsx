@@ -5,7 +5,12 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from '../Layout/Layout';
 import { refreshUser } from '../../redux/auth/operations';
 import { fetchContacts } from '../../redux/contacts/operations';
-import { selectIsLoggedIn } from '../../redux/auth/selectors';
+import {
+  selectIsLoggedIn,
+  selectIsRefreshing,
+} from '../../redux/auth/selectors';
+import PrivateRoute from '../PrivateRoute/PrivateRoute';
+import RestrictedRoute from '../RestrictedRoute/RestrictedRoute';
 
 const HomePage = lazy(() => import('../../pages/HomePage/HomePage'));
 const RegisterPage = lazy(() =>
@@ -19,6 +24,7 @@ const ContactsPage = lazy(() =>
 export default function App() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(selectIsLoggedIn);
+  const isRefreshing = useSelector(selectIsRefreshing);
 
   useEffect(() => {
     dispatch(refreshUser());
@@ -30,14 +36,34 @@ export default function App() {
     }
   }, [dispatch, isLoggedIn]);
 
-  return (
+  return isRefreshing ? (
+    <div>REFRESHING USER...</div>
+  ) : (
     <Layout>
-      <Suspense fallback={null}>
+      <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/contacts" element={<ContactsPage />} />
+          <Route
+            path="/register"
+            element={
+              <RestrictedRoute component={<RegisterPage />} redirectTo="/" />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <RestrictedRoute
+                component={<LoginPage />}
+                redirectTo="/contacts"
+              />
+            }
+          />
+          <Route
+            path="/contacts"
+            element={
+              <PrivateRoute component={<ContactsPage />} redirectTo="/login" />
+            }
+          />
         </Routes>
       </Suspense>
     </Layout>

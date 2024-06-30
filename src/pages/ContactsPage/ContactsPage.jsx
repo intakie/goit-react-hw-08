@@ -1,12 +1,14 @@
 import { useSelector } from 'react-redux';
+
 import ContactEditor from '../../components/ContactEditor/ContactEditor';
 import ContactList from '../../components/ContactList/ContactList';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import { selectAllContacts } from '../../redux/contacts/selectors';
+import { selectContacts } from '../../redux/contacts/selectors';
+
 import css from './ContactsPage.module.css';
 
 export default function ContactsPage() {
-  const contacts = useSelector(selectAllContacts);
+  const contacts = useSelector(selectContacts);
 
   return (
     <div>

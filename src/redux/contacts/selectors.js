@@ -1,8 +1,13 @@
-export const selectAllContacts = state => state.contacts.items;
+import { createSelector } from 'reselect';
 
-export const selectFilteredContacts = state => {
-  const filter = state.filters.name.toLowerCase();
-  return state.contacts.items.filter(contact =>
-    contact.name.toLowerCase().includes(filter)
-  );
-};
+export const selectContacts = state => state.contacts.items;
+export const selectNameFilter = state => state.filters.name;
+
+export const selectFilteredContacts = createSelector(
+  [selectContacts, selectNameFilter],
+  (contacts, filter) => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+);
